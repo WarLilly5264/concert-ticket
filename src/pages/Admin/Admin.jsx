@@ -8,9 +8,10 @@ function Admin() {
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
-  
-  // เพิ่ม State สำหรับเก็บยอดตั๋ว
   const [ticketsLeft, setTicketsLeft] = useState('...'); 
+  
+  // 🔍 State ใหม่สำหรับเก็บข้อความค้นหา
+  const [searchTerm, setSearchTerm] = useState('');
 
   const ADMIN_PASSWORD = 'baannaa_admin'; 
 
@@ -19,14 +20,13 @@ function Admin() {
     if (password === ADMIN_PASSWORD) {
       setIsAuthorized(true);
       fetchBookings(); 
-      fetchEventData(); // ดึงยอดตั๋วคงเหลือด้วยตอนล็อกอินผ่าน
+      fetchEventData(); 
     } else {
       alert('รหัสผ่านไม่ถูกต้อง!');
       setPassword('');
     }
   };
 
-  // ฟังก์ชันใหม่สำหรับดึงยอดตั๋วคงเหลือ
   const fetchEventData = async () => {
     const { data, error } = await supabase.from('events').select('*');
     if (!error && data.length > 0) {
@@ -51,7 +51,6 @@ function Admin() {
 
   const toggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'pending' ? 'confirmed' : 'pending';
-    
     const { error } = await supabase
       .from('bookings')
       .update({ status: newStatus })
@@ -63,6 +62,33 @@ function Admin() {
       fetchBookings();
     }
   };
+
+  const deleteBooking = async (id, quantity, eventId) => {
+    const confirmDelete = window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้? (ระบบจะคืนโควต้าบัตรให้คนอื่นซื้อต่อได้)');
+    if (!confirmDelete) return;
+
+    try {
+      const { error: deleteError } = await supabase.from('bookings').delete().eq('id', id);
+      if (deleteError) throw deleteError;
+
+      const { data: eventData, error: eventError } = await supabase.from('events').select('tickets_sold').eq('id', eventId).single();
+      if (eventError) throw eventError;
+
+      const { error: updateError } = await supabase.from('events').update({ tickets_sold: eventData.tickets_sold - quantity }).eq('id', eventId);
+      if (updateError) throw updateError;
+
+      alert('ลบข้อมูลและคืนโควต้าสำเร็จ!');
+      fetchBookings(); 
+      fetchEventData(); 
+    } catch (err) {
+      alert('เกิดข้อผิดพลาดในการลบ: ' + err.message);
+    }
+  };
+
+  // 🔍 กรองข้อมูลตามเบอร์โทร (ถ้ายอดพิมพ์ตรงกับบางส่วนของเบอร์ก็จะแสดงผลทันที)
+  const filteredBookings = bookings.filter((booking) => 
+    booking.phone.includes(searchTerm)
+  );
 
   if (!isAuthorized) {
     return (
@@ -87,16 +113,27 @@ function Admin() {
       <div className={styles.container}>
         <h2 className={styles.pageTitle}>ระบบจัดการหลังบ้าน</h2>
         
-        {/* --- กล่องแสดงยอดบัตรคงเหลือบนหน้าแอดมิน --- */}
         <div className={styles.summaryBox}>
           <h3>ยอดบัตรคงเหลือ: <span className={styles.stockHighlight}>{ticketsLeft} / 50 ใบ</span></h3>
+        </div>
+
+        {/* 🔍 กล่องค้นหาเบอร์โทร */}
+        <div className={styles.searchBox}>
+          <input 
+            type="tel" 
+            placeholder="🔍 ค้นหาด้วยเบอร์โทรศัพท์..." 
+            className={styles.searchInput}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         
         {loading ? (
           <p className={styles.loadingText}>กำลังโหลดข้อมูล...</p>
         ) : (
           <div className={styles.cardContainer}>
-            {bookings.map((booking) => (
+            {/* เปลี่ยนจากการ map bookings มาเป็น filteredBookings */}
+            {filteredBookings.map((booking) => (
               <div key={booking.id} className={styles.card}>
                 
                 <div className={styles.cardHeader}>
@@ -114,20 +151,31 @@ function Admin() {
 
                 <div className={styles.cardFooter}>
                   <a href={booking.slip_url} target="_blank" rel="noreferrer" className={styles.btnSlip}>
-                    ดูรูปสลิป
+                    ดูสลิป
                   </a>
                   <button 
                     className={booking.status === 'pending' ? styles.btnApprove : styles.btnRevoke}
                     onClick={() => toggleStatus(booking.id, booking.status)}
                   >
-                    {booking.status === 'pending' ? '✅ อนุมัติ' : '❌ ยกเลิกอนุมัติ'}
+                    {booking.status === 'pending' ? '✅ อนุมัติ' : '❌ ยกเลิก'}
+                  </button>
+                  <button 
+                    className={styles.btnDelete}
+                    onClick={() => deleteBooking(booking.id, booking.quantity, booking.event_id)}
+                  >
+                    🗑️ ลบ
                   </button>
                 </div>
 
               </div>
             ))}
             
-            {bookings.length === 0 && <p className={styles.emptyText}>ยังไม่มีรายการจอง</p>}
+            {/* กรณีพิมพ์หาแล้วไม่เจอข้อมูลเลย */}
+            {filteredBookings.length === 0 && (
+              <p className={styles.emptyText}>
+                {searchTerm ? 'ไม่พบข้อมูลการจองสำหรับเบอร์นี้' : 'ยังไม่มีรายการจอง'}
+              </p>
+            )}
           </div>
         )}
       </div>
