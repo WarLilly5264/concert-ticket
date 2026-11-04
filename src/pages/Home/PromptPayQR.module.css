@@ -1,0 +1,141 @@
+.wrap {
+  margin-bottom: 16px;
+}
+
+/* การ์ดแบบตั๋ว ให้เข้ากับ E-Ticket */
+.ticket {
+  background: #fff;
+  color: #111;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 28px rgba(229, 9, 20, 0.3);
+  text-align: left;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #ff0f47, #e50914);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.head strong {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.body {
+  position: relative;
+  padding: 22px 16px 16px;
+  text-align: center;
+}
+
+/* รอยบากสองข้าง ใช้สีเดียวกับพื้น modal (#222) */
+.body::before,
+.body::after {
+  content: '';
+  position: absolute;
+  top: -11px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #222;
+}
+.body::before { left: -11px; }
+.body::after { right: -11px; }
+
+.frame {
+  position: relative;
+  width: 220px;
+  margin: 0 auto;
+  line-height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* canvas สร้างที่ 440px แล้วย่อลงให้คม */
+.qrCanvas canvas {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
+/* เส้นสแกนวิ่งผ่าน QR เป็นแอนิเมชันเดียวของการ์ดนี้ */
+.scanLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #e50914, transparent);
+  box-shadow: 0 0 12px 2px rgba(229, 9, 20, 0.5);
+  pointer-events: none;
+  animation: scan 3s ease-in-out infinite;
+}
+
+@keyframes scan {
+  0%   { top: 0; opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { top: calc(100% - 3px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanLine { display: none; }
+}
+
+.name {
+  margin: 16px 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.id {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.saveButton {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e50914;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: #e50914;
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+}
+
+.saveButton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.saveButton:disabled {
+  border-color: #555;
+  color: #888;
+  cursor: wait;
+}
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: #aaa;
+}

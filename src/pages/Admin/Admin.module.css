@@ -1,0 +1,198 @@
+.adminPage {
+  min-height: 100vh;
+  background-color: #111;
+  color: #fff;
+  padding: 20px 10px;
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.pageTitle {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+  color: #eee;
+}
+
+.loadingText, .emptyText {
+  text-align: center;
+  color: #888;
+}
+
+/* --- Card Layout --- */
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background-color: #222;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #333;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+.cardHeader h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+/* --- Status Badges --- */
+.badgePending {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.badgeConfirmed {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+/* --- Card Body --- */
+.cardBody p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.cardBody strong {
+  color: #999;
+}
+
+/* --- Card Footer & Buttons --- */
+.cardFooter {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #333;
+}
+
+.btnSlip, .btnApprove, .btnRevoke {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+}
+
+.btnSlip {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.btnSlip:hover {
+  background-color: #2563eb;
+}
+
+.btnApprove {
+  background-color: #10b981;
+  color: #fff;
+}
+
+.btnApprove:hover {
+  background-color: #059669;
+}
+
+.btnRevoke {
+  background-color: transparent;
+  border: 1px solid #555;
+  color: #ccc;
+}
+
+.btnRevoke:hover {
+  background-color: #333;
+}
+
+/* --- Responsive สำหรับจอคอม (Grid 2 คอลัมน์) --- */
+@media (min-width: 600px) {
+  .cardContainer {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+/* --- Admin Login Box --- */
+.loginContainer {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #111;
+}
+
+.loginBox {
+  background-color: #222;
+  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+  width: 100%;
+  max-width: 320px;
+}
+
+.loginBox h2 {
+  color: #fff;
+  margin-top: 0;
+  margin-bottom: 24px;
+  letter-spacing: 1px;
+}
+
+.loginInput {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background-color: #111;
+  color: white;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.loginButton {
+  width: 100%;
+  background-color: #e50914;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.loginButton:hover {
+  background-color: #ff0f47;
+  transform: translateY(-2px);
+}

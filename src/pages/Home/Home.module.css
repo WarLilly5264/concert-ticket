@@ -1,0 +1,501 @@
+.container {
+width: 100%;
+min-height: 100vh;
+padding: 16px;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 16px;
+font-family: sans-serif;
+background-color: #111;
+color: #fff;
+box-sizing: border-box; /* ป้องกัน padding ดันหน้าจอทะลุขอบ */
+}
+
+.posterSection {
+width: 100%;
+display: flex;
+justify-content: center;
+}
+
+.poster {
+width: 100%;
+max-width: 380px; /* คุมขนาดไม่ให้ใหญ่เกินไปบนแท็บเล็ต */
+border-radius: 12px;
+box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.detailsSection {
+width: 100%;
+max-width: 380px;
+text-align: left; /* มือถืออ่านง่ายกว่าเมื่อจัดชิดซ้าย */
+}
+
+/* --- Title Design (หัวข้อไล่สี) --- */
+.title {
+font-size: 1.6rem;
+margin: 0;
+font-weight: 900;
+text-transform: uppercase;
+background: linear-gradient(90deg, #ffffff, #a3a3a3);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+letter-spacing: 1.5px;
+}
+
+.date {
+color: #aaa;
+font-size: 0.9rem;
+margin-bottom: 16px;
+}
+
+/* --- Info Cards (เพิ่มลูกเล่น Hover ให้กล่องลอยขึ้น) --- */
+.schedule, .ticketInfo {
+background-color: #222;
+padding: 20px;
+border-radius: 12px;
+margin-bottom: 20px;
+border: 1px solid #333;
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+line-height: 1.5;
+}
+
+.schedule:hover, .ticketInfo:hover {
+transform: translateY(-5px);
+box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+border-color: #444;
+}
+
+.stock {
+margin-top: 8px;
+color: #d8c306;
+font-weight: bold;
+}
+
+/* --- Main Booking Button (ปุ่มจองตั๋วแบบมีแสง Glow และไล่สี) --- */
+.bookButton {
+width: 100%;
+background: linear-gradient(135deg, #ff0f47, #e50914);
+color: white;
+border: none;
+padding: 16px;
+border-radius: 8px;
+font-size: 1.2rem;
+font-weight: 800;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.bookButton:hover:not(:disabled) {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(229, 9, 20, 0.7);
+}
+
+.bookButton:disabled {
+background: #555;
+box-shadow: none;
+cursor: not-allowed;
+color: #888;
+}
+
+/* --- Check Ticket Button (ปุ่มตรวจสอบตั๋วแบบ Outline สวยๆ) --- */
+.checkButton {
+width: 100%;
+background-color: transparent;
+color: #ccc;
+border: 1px solid #555;
+padding: 14px;
+border-radius: 8px;
+font-size: 1rem;
+font-weight: bold;
+cursor: pointer;
+margin-top: 12px;
+transition: all 0.3s ease;
+}
+
+.checkButton:hover {
+background-color: rgba(255, 255, 255, 0.1);
+color: #fff;
+border-color: #888;
+transform: translateY(-2px);
+}
+
+/* --- Modal Design --- */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85); /* พื้นหลังดำโปร่งแสง */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.modalContent {
+background-color: #222;
+width: 100%;
+max-width: 400px;
+padding: 24px;
+border-radius: 12px;
+text-align: center;
+box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.cancelButton {
+background-color: transparent;
+color: #ccc;
+border: 1px solid #555;
+padding: 10px 20px;
+border-radius: 6px;
+cursor: pointer;
+width: 100%;
+}
+
+.formGroup {
+display: flex;
+flex-direction: column;
+gap: 12px;
+margin-bottom: 16px;
+text-align: left;
+}
+
+.inputField, .selectField {
+width: 100%;
+padding: 12px;
+border-radius: 8px;
+border: 1px solid #444;
+background-color: #333;
+color: white;
+font-size: 1rem;
+box-sizing: border-box;
+}
+
+.qtyRow {
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.selectField {
+width: 100px;
+}
+
+.paymentBox {
+background-color: #333;
+padding: 16px;
+border-radius: 8px;
+margin-bottom: 16px;
+}
+
+.qrBox {
+  display: inline-block;
+  background: #fff;
+  padding: 12px;
+  margin: 12px auto;
+  border-radius: 16px;
+  border-top: 6px solid #e50914; /* โทนแดงเข้ากับ E-Ticket */
+  box-shadow: 0 0 24px rgba(229, 9, 20, 0.35);
+  line-height: 0;
+}
+
+.fileLabel {
+font-size: 0.9rem;
+color: #ccc;
+}
+
+.fileInput {
+width: 100%;
+color: #ccc;
+}
+
+.buttonGroup {
+display: flex;
+gap: 12px;
+}
+
+.confirmButton {
+flex: 1;
+background-color: #e50914;
+color: white;
+border: none;
+padding: 12px;
+border-radius: 8px;
+font-size: 1rem;
+font-weight: bold;
+cursor: pointer;
+}
+
+.confirmButton:disabled {
+background-color: #555;
+cursor: not-allowed;
+}
+
+.cancelButton {
+flex: 1;
+background-color: transparent;
+color: #ccc;
+border: 1px solid #555;
+padding: 12px;
+border-radius: 8px;
+cursor: pointer;
+}
+
+/* --- E-Ticket Design (แบบตั๋วฉีก) --- */
+.eTicketWrapper {
+margin: 20px auto 15px auto;
+max-width: 360px;
+border-radius: 16px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+overflow: hidden;
+}
+
+.eTicketTop {
+background-color: #e50914;
+padding: 30px 20px 20px 20px;
+text-align: center;
+}
+
+.eTicketHeader {
+font-size: 2.2rem;
+color: #fff;
+margin: 0 0 5px 0;
+font-weight: 900;
+letter-spacing: 4px;
+}
+
+.eTicketEvent {
+font-size: 1.1rem;
+color: #ffcccc;
+margin: 0;
+font-weight: 600;
+letter-spacing: 1px;
+}
+
+.ticketDivider {
+background-color: #222;
+height: 0;
+border-top: 2px dashed #555;
+position: relative;
+}
+
+
+.ticketDivider::before, .ticketDivider::after {
+  content: '';
+  position: absolute;
+  top: -12px; /* ดึงขึ้นไปครึ่งนึงของความสูง */
+  width: 24px;
+  height: 24px;
+  background-color: #111; /* ใช้สีเดียวกับพื้นหลังเว็บ */
+  border-radius: 50%;
+}
+
+.ticketDivider::before { left: -12px; }
+.ticketDivider::after { right: -12px; }
+
+.eTicketBottom {
+background-color: #222;
+padding: 30px 20px;
+text-align: center;
+}
+
+.eTicketDetails {
+text-align: left;
+margin-bottom: 25px;
+}
+
+.detailRow {
+display: flex;
+justify-content: space-between;
+padding: 10px 0;
+border-bottom: 1px solid #333;
+font-size: 0.95rem;
+color: #ccc;
+}
+
+.detailRow:last-child {
+border-bottom: none;
+}
+
+.detailRow strong {
+color: #fff;
+text-align: right;
+}
+
+.eTicketStatus {
+display: inline-block;
+background-color: rgba(245, 158, 11, 0.15);
+color: #fcd34d;
+border: 1px solid #fcd34d;
+padding: 8px 20px;
+border-radius: 25px;
+font-size: 0.95rem;
+font-weight: bold;
+margin-bottom: 20px;
+}
+
+.eTicketStatusConfirmed {
+display: inline-block;
+background-color: rgba(16, 185, 129, 0.15);
+color: #6ee7b7;
+border: 1px solid #6ee7b7;
+padding: 8px 20px;
+border-radius: 25px;
+font-size: 0.95rem;
+font-weight: bold;
+margin-bottom: 20px;
+}
+
+.eTicketNote {
+color: #888;
+font-size: 0.85rem;
+margin: 0;
+}
+
+/* --- Back Button --- */
+.backButton {
+background-color: #333;
+color: #fff;
+border: none;
+padding: 12px 24px;
+border-radius: 8px;
+cursor: pointer;
+width: 100%;
+font-weight: bold;
+font-size: 1rem;
+}
+
+.backButton:hover {
+background-color: #444;
+}
+/* ===== วางต่อท้ายไฟล์ Home.module.css (อยู่ท้ายสุดเพื่อให้ทับค่าเดิม) ===== */
+
+/* --- Modal: เลื่อนดูได้เมื่อจอเตี้ย --- */
+.modalContent {
+  max-height: 92vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- ช่องกรอก / เลือกจำนวน: สูงพอให้จิ้มง่าย --- */
+.inputField,
+.selectField {
+  min-height: 48px;
+}
+
+/* --- กล่องแนบสลิป: แตะได้ทั้งกล่อง --- */
+.uploadBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 72px;
+  padding: 14px 16px;
+  border: 2px dashed #666;
+  border-radius: 12px;
+  background-color: #2b2b2b;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.uploadBox:hover,
+.uploadBox:active {
+  border-color: #e50914;
+  background-color: #333;
+}
+
+.uploadBox:focus-within {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* แนบแล้ว: เปลี่ยนเป็นเส้นทึบสีเขียวให้รู้ว่าเรียบร้อย */
+.uploadBoxFilled {
+  border-style: solid;
+  border-color: #6ee7b7;
+  background-color: rgba(16, 185, 129, 0.1);
+  justify-content: flex-start;
+}
+
+/* input จริงซ่อนไว้ แต่ยังโฟกัสด้วยคีย์บอร์ดได้ */
+.fileInputHidden {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.uploadText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.uploadBoxFilled .uploadText {
+  text-align: left;
+}
+
+.uploadText strong {
+  font-size: 1.05rem;
+}
+
+.uploadText small {
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.slipThumb {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #555;
+  flex-shrink: 0;
+}
+
+/* --- ปุ่มท้าย Modal: ใหญ่ ขนาดตัวอักษรเท่ากัน และลอยติดขอบล่างไม่ต้องเลื่อนหา --- */
+.buttonGroup {
+  position: sticky;
+  bottom: 0;
+  gap: 12px;
+  margin: 0 0 -24px;
+  padding: 12px 0 24px;
+  background-color: #222;
+  z-index: 2;
+}
+
+.cancelButton,
+.confirmButton {
+  min-height: 52px;
+  font-size: 1.05rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cancelButton {
+  flex: 1;
+  font-weight: bold;
+}
+
+.confirmButton {
+  flex: 1.4;
+}
+
+.confirmButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
