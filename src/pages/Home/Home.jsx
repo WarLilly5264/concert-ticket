@@ -209,7 +209,7 @@ function Home() {
             <div className={styles.ticketInfo}>
               <p>ONLINE TICKET: <strong>150฿</strong></p>
               <p>AT DOOR: 250฿</p>
-              <p className={styles.stock}>เหลือบัตร: {ticketsLeft} / 50 ใบ</p>
+             
             </div>
             
             <button 
