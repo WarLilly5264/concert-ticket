@@ -3,24 +3,34 @@ import styles from './Admin.module.css';
 import { supabase } from '../../lib/supabase';
 
 function Admin() {
-  // State สำหรับระบบ Login
   const [password, setPassword] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
+  
+  // เพิ่ม State สำหรับเก็บยอดตั๋ว
+  const [ticketsLeft, setTicketsLeft] = useState('...'); 
 
-  // 🔴 ตั้งรหัสผ่านแอดมินของคุณตรงนี้
   const ADMIN_PASSWORD = 'baannaa_admin'; 
 
   const handleLogin = (e) => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
       setIsAuthorized(true);
-      fetchBookings(); // พอรหัสถูก ค่อยไปดึงข้อมูลตั๋วมา
+      fetchBookings(); 
+      fetchEventData(); // ดึงยอดตั๋วคงเหลือด้วยตอนล็อกอินผ่าน
     } else {
       alert('รหัสผ่านไม่ถูกต้อง!');
       setPassword('');
+    }
+  };
+
+  // ฟังก์ชันใหม่สำหรับดึงยอดตั๋วคงเหลือ
+  const fetchEventData = async () => {
+    const { data, error } = await supabase.from('events').select('*');
+    if (!error && data.length > 0) {
+      setTicketsLeft(data[0].total_tickets - data[0].tickets_sold);
     }
   };
 
@@ -54,7 +64,6 @@ function Admin() {
     }
   };
 
-  // --- ถ้ายังไม่ผ่านการล็อกอิน ให้โชว์หน้ากรอกรหัส ---
   if (!isAuthorized) {
     return (
       <div className={styles.loginContainer}>
@@ -73,11 +82,15 @@ function Admin() {
     );
   }
 
-  // --- โชว์หน้า Dashboard ปกติ (หลังจากล็อกอินผ่านแล้ว) ---
   return (
     <div className={styles.adminPage}>
       <div className={styles.container}>
         <h2 className={styles.pageTitle}>ระบบจัดการหลังบ้าน</h2>
+        
+        {/* --- กล่องแสดงยอดบัตรคงเหลือบนหน้าแอดมิน --- */}
+        <div className={styles.summaryBox}>
+          <h3>ยอดบัตรคงเหลือ: <span className={styles.stockHighlight}>{ticketsLeft} / 50 ใบ</span></h3>
+        </div>
         
         {loading ? (
           <p className={styles.loadingText}>กำลังโหลดข้อมูล...</p>

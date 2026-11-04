@@ -196,3 +196,27 @@
   background-color: #ff0f47;
   transform: translateY(-2px);
 }
+/* --- Dashboard Summary Box --- */
+.summaryBox {
+  background-color: #222;
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.summaryBox h3 {
+  margin: 0;
+  color: #ccc;
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
+}
+
+.stockHighlight {
+  color: #fcd34d; /* สีเหลืองทองเด่นๆ */
+  font-weight: 900;
+  font-size: 1.4rem;
+  margin-left: 8px;
+}
