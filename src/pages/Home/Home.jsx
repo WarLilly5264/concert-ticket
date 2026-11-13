@@ -3,17 +3,60 @@ import styles from './Home.module.css';
 import { supabase } from '../../lib/supabase';
 import { promptPayPayload } from '../../lib/promptpay';
 import PromptPayQR from './PromptPayQR';
-import posterImg from '../../assets/image_899a45.jpg'; 
 
-const PROMPTPAY_ID = '0801650551'; // ใส่เบอร์พร้อมเพย์จริง
+// โหลดรูปโปสเตอร์ทั้ง 2 งาน
+import posterImg1 from '../../assets/image_899a45.jpg'; 
+import posterImg2 from '../../assets/indie-kids-3.png'; 
+
+const PROMPTPAY_ID = '0801650551';
 const ACCOUNT_NAME = 'ภูมินทร์ สุรินโยธา';
-const TICKET_PRICE = 150;
+
+// --- ข้อมูลของแต่ละคอนเสิร์ต ---
+const EVENTS_INFO = [
+  {
+    dbId: "cf6e40ed-b5fb-4c06-84bc-070b24e3c11e", 
+    shortName: "INDIE X BAANNAA", 
+    title: "INDIE KIDS X BAANNAA",
+    date: "27 NOVEMBER 2026 @ BAANNAA",
+    poster: posterImg1,
+    schedule: [
+      "19:00 Doors Open",
+      "20:00 SVCKNID",
+      "20:45 SECRET DOOR",
+      "21:30 IDIN"
+    ],
+    onlinePrice: 150,
+    doorPrice: 250
+  },
+  {
+    dbId: "cbea4e42-b6a6-41df-852a-377137ce9fa3",
+    shortName: "INDIE KIDS 3", 
+    title: "อินดี้คิดส์ปาร์ตี้ 3",
+    date: "26 DECEMBER 2026",
+    poster: posterImg2,
+    schedule: [
+      "Lineup:",
+      "PADMI",
+      "Solitaryn",
+      "Moontage Daydream",
+      "FongFord",
+      "UBG.4US x FKCREW",
+      "IDIN",
+      "SvckNid",
+      "L4wW x AkMiller",
+      "Secret Door"
+    ],
+    onlinePrice: 150,
+    doorPrice: 150 
+  }
+];
 
 function Home() {
-  const [eventId, setEventId] = useState(null);
-  const [ticketsLeft, setTicketsLeft] = useState('กำลังโหลด...');
+  const [activeTab, setActiveTab] = useState(0);
+  const currentEvent = EVENTS_INFO[activeTab];
+
+  const [dbEvents, setDbEvents] = useState([]);
   
-  // State สำหรับ Modal จองตั๋ว
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');
@@ -21,16 +64,14 @@ function Home() {
   const [quantity, setQuantity] = useState(1);
   const [slipFile, setSlipFile] = useState(null);
 
-  // State สำหรับ Modal ตรวจสอบตั๋ว
   const [isCheckModalOpen, setIsCheckModalOpen] = useState(false);
   const [checkPhone, setCheckPhone] = useState('');
   const [isChecking, setIsChecking] = useState(false);
 
-  // State เก็บข้อมูลตั๋วเพื่อแสดง E-Ticket
   const [bookingSuccess, setBookingSuccess] = useState(null);
 
-  // ตัวอย่างรูปสลิปที่เลือก (ให้ลูกค้าเห็นว่าแนบถูกใบ)
   const [slipPreview, setSlipPreview] = useState(null);
+
   useEffect(() => {
     if (!slipFile) {
       setSlipPreview(null);
@@ -42,21 +83,22 @@ function Home() {
   }, [slipFile]);
 
   useEffect(() => {
-    const fetchEventData = async () => {
+    const fetchAllEvents = async () => {
       const { data, error } = await supabase.from('events').select('*');
-      if (error) {
-        console.error('เชื่อมต่อ Supabase พลาด:', error.message);
-        setTicketsLeft('Error');
-      } else if (data.length > 0) {
-        setTicketsLeft(data[0].total_tickets - data[0].tickets_sold);
-        setEventId(data[0].id);
+      if (!error && data) {
+        setDbEvents(data);
+      } else {
+        console.error('เชื่อมต่อ Supabase พลาด:', error?.message);
       }
     };
-    fetchEventData();
+    fetchAllEvents();
   }, []);
 
+  const activeDbData = dbEvents.find(e => e.id === currentEvent.dbId);
+  const ticketsLeft = activeDbData ? (activeDbData.total_tickets - activeDbData.tickets_sold) : 'กำลังโหลด...';
+
   const handleBooking = async () => {
-    if (!name || !phone || !slipFile || !eventId) return;
+    if (!name || !phone || !slipFile || !currentEvent.dbId) return;
 
     setIsSubmitting(true);
     try {
@@ -75,7 +117,7 @@ function Home() {
       const slipUrl = publicUrlData.publicUrl;
 
       const { data: rpcData, error: rpcError } = await supabase.rpc('book_tickets', {
-        p_event_id: eventId,
+        p_event_id: currentEvent.dbId,
         p_name: name,
         p_phone: phone,
         p_qty: quantity,
@@ -86,12 +128,13 @@ function Home() {
 
       if (rpcData && rpcData.success) {
         setBookingSuccess({
+          eventName: currentEvent.title,
           name,
           phone,
           quantity,
-          total: quantity * TICKET_PRICE,
+          total: quantity * currentEvent.onlinePrice,
           timestamp: new Date().toLocaleString('th-TH'),
-          status: 'pending' // จองใหม่สถานะเป็นรอยืนยันเสมอ
+          status: 'pending' 
         });
         
         setIsModalOpen(false);
@@ -99,7 +142,7 @@ function Home() {
         setPhone('');
         setQuantity(1);
         setSlipFile(null);
-        setTicketsLeft(prev => prev - quantity);
+        setDbEvents(prev => prev.map(e => e.id === currentEvent.dbId ? { ...e, tickets_sold: e.tickets_sold + quantity } : e));
       } else {
         alert(rpcData?.message || 'จองไม่สำเร็จ โปรดลองใหม่');
       }
@@ -110,13 +153,11 @@ function Home() {
     }
   };
 
-  // ฟังก์ชันดึงข้อมูลตั๋วเก่า
   const handleCheckTicket = async () => {
     if (!checkPhone) return;
     setIsChecking(true);
     
     try {
-      // ค้นหาเบอร์โทรในฐานข้อมูล เรียงจากล่าสุด
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
@@ -128,11 +169,14 @@ function Home() {
 
       if (data && data.length > 0) {
         const b = data[0];
+        const bookedEvent = EVENTS_INFO.find(e => e.dbId === b.event_id) || currentEvent;
+
         setBookingSuccess({
+          eventName: bookedEvent.title,
           name: b.customer_name,
           phone: b.phone,
           quantity: b.quantity,
-          total: b.quantity * TICKET_PRICE,
+          total: b.quantity * bookedEvent.onlinePrice,
           timestamp: new Date(b.created_at).toLocaleString('th-TH'),
           status: b.status
         });
@@ -151,21 +195,16 @@ function Home() {
   return (
     <div className={styles.container}>
       
-      {/* ถ้าจองสำเร็จ ให้แสดง E-Ticket แทนหน้าหลัก */}
       {bookingSuccess ? (
         <>
           <div className={styles.eTicketWrapper}>
-            
-            {/* ส่วนหัวตั๋วสีแดง */}
             <div className={styles.eTicketTop}>
               <h2 className={styles.eTicketHeader}>E-TICKET</h2>
-              <h3 className={styles.eTicketEvent}>INDIE KIDS X BAANNAA</h3>
+              <h3 className={styles.eTicketEvent}>{bookingSuccess.eventName}</h3>
             </div>
             
-            {/* รอยปรุและรอยฉีกตั๋ว */}
             <div className={styles.ticketDivider}></div>
             
-            {/* ส่วนรายละเอียดตั๋ว */}
             <div className={styles.eTicketBottom}>
               <div className={styles.eTicketDetails}>
                 <div className={styles.detailRow}><span>ชื่อ:</span> <strong>{bookingSuccess.name}</strong></div>
@@ -175,14 +214,12 @@ function Home() {
                 <div className={styles.detailRow}><span>เวลา:</span> <strong>{bookingSuccess.timestamp}</strong></div>
               </div>
 
-              {/* สลับสีสถานะ */}
               <div className={bookingSuccess.status === 'confirmed' ? styles.eTicketStatusConfirmed : styles.eTicketStatus}>
                 {bookingSuccess.status === 'confirmed' ? '✅ ยืนยันการชำระเงินแล้ว' : '⏳ รอตรวจสอบการชำระเงิน'}
               </div>
               
               <p className={styles.eTicketNote}>โปรดแคปหน้าจอนี้เก็บไว้เป็นหลักฐานเพื่อแสดงหน้างาน</p>
             </div>
-
           </div>
           
           <button className={styles.backButton} onClick={() => setBookingSuccess(null)}>
@@ -191,25 +228,42 @@ function Home() {
         </>
       ) : (
         <>
+          <div className={styles.tabContainer}>
+            {EVENTS_INFO.map((event, index) => (
+              <button 
+                key={event.dbId}
+                className={activeTab === index ? `${styles.tabButton} ${styles.activeTab}` : styles.tabButton}
+                onClick={() => setActiveTab(index)}
+              >
+                {event.shortName}
+              </button>
+            ))}
+          </div>
+
           <div className={styles.posterSection}>
-            <img src={posterImg} alt="INDIE KIDS X BAANNAA" className={styles.poster} />
+            <img src={currentEvent.poster} alt={currentEvent.title} className={styles.poster} />
           </div>
 
           <div className={styles.detailsSection}>
-            <h1 className={styles.title}>INDIE KIDS X BAANNAA</h1>
-            <p className={styles.date}>27 NOVEMBER 2026 @ BAANNAA</p>
+            <h1 className={styles.title}>{currentEvent.title}</h1>
+            <p className={styles.date}>{currentEvent.date}</p>
             
             <div className={styles.schedule}>
-              <p>19:00 Doors Open</p>
-              <p>20:00 SVCKNID</p>
-              <p>20:45 SECRET DOOR</p>
-              <p>21:30 IDIN</p>
+              {currentEvent.schedule.map((item, idx) => (
+                item === "Lineup:" ? (
+                  <h4 key={idx} className={styles.lineupHeader}>LINEUP ARTISTS</h4>
+                ) : (
+                  <div key={idx} className={styles.scheduleItem}>
+                    <span className={styles.bulletPoint}></span>
+                    {item}
+                  </div>
+                )
+              ))}
             </div>
             
             <div className={styles.ticketInfo}>
-              <p>ONLINE TICKET: <strong>150฿</strong></p>
-              <p>AT DOOR: 250฿</p>
-             
+              <p>ONLINE TICKET: <strong>{currentEvent.onlinePrice}฿</strong></p>
+              <p>AT DOOR: {currentEvent.doorPrice}฿</p>
             </div>
             
             <button 
@@ -217,10 +271,9 @@ function Home() {
               disabled={ticketsLeft === 0 || ticketsLeft === 'กำลังโหลด...'}
               onClick={() => setIsModalOpen(true)}
             >
-              {ticketsLeft > 0 ? 'จองบัตรเลย' : 'SOLD OUT'}
+              {ticketsLeft === 'กำลังโหลด...' ? 'กำลังเชื่อมต่อ...' : (ticketsLeft > 0 ? 'จองบัตรเลย' : 'SOLD OUT')}
             </button>
             
-            {/* ปุ่มสำหรับเช็คตั๋ว */}
             <button 
               className={styles.checkButton}
               onClick={() => setIsCheckModalOpen(true)}
@@ -231,7 +284,6 @@ function Home() {
         </>
       )}
 
-      {/* Modal จองตั๋ว */}
       {isModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
@@ -249,10 +301,9 @@ function Home() {
               </div>
             </div>
 
-            {/* QR พร้อมเพย์ + ปุ่มบันทึกรูป (แทนที่ paymentBox เดิมทั้งก้อน) */}
             <PromptPayQR
-              payload={promptPayPayload(PROMPTPAY_ID, quantity * TICKET_PRICE)}
-              amount={quantity * TICKET_PRICE}
+              payload={promptPayPayload(PROMPTPAY_ID, quantity * currentEvent.onlinePrice)}
+              amount={quantity * currentEvent.onlinePrice}
               accountName={ACCOUNT_NAME}
               displayId={PROMPTPAY_ID.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')}
             />
@@ -293,7 +344,6 @@ function Home() {
         </div>
       )}
 
-      {/* Modal ตรวจสอบตั๋ว */}
       {isCheckModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
