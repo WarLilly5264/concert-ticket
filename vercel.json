@@ -1,8 +1,7 @@
 {
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/INDIE_KIDS_X_BAANNAA", "destination": "/api/og?event=1" },
+    { "source": "/INDIE_KIDS_3", "destination": "/api/og?event=2" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
