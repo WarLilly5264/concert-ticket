@@ -2,25 +2,28 @@ import React, { useState } from 'react';
 import styles from './Admin.module.css';
 import { supabase } from '../../lib/supabase';
 
+const EVENT_NAMES = {
+  'cf6e40ed-b5fb-4c06-84bc-070b24e3c11e': 'INDIE KIDS X BAANNAA',
+  'cbea4e42-b6a6-41df-852a-377137ce9fa3': 'อินดี้คิดส์ปาร์ตี้ 3'
+};
+
 function Admin() {
   const [password, setPassword] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   const [bookings, setBookings] = useState([]);
+  const [eventsList, setEventsList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [ticketsLeft, setTicketsLeft] = useState('...'); 
-  
-  // 🔍 State ใหม่สำหรับเก็บข้อความค้นหา
   const [searchTerm, setSearchTerm] = useState('');
 
-  const ADMIN_PASSWORD = 'baannaa_admin'; 
+  const ADMIN_PASSWORD = 'baannaa_admin';
 
   const handleLogin = (e) => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
       setIsAuthorized(true);
-      fetchBookings(); 
-      fetchEventData(); 
+      fetchBookings();
+      fetchEventData();
     } else {
       alert('รหัสผ่านไม่ถูกต้อง!');
       setPassword('');
@@ -29,8 +32,8 @@ function Admin() {
 
   const fetchEventData = async () => {
     const { data, error } = await supabase.from('events').select('*');
-    if (!error && data.length > 0) {
-      setTicketsLeft(data[0].total_tickets - data[0].tickets_sold);
+    if (!error && data) {
+      setEventsList(data);
     }
   };
 
@@ -40,7 +43,7 @@ function Admin() {
       .from('bookings')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) {
       console.error('Error fetching bookings:', error.message);
     } else {
@@ -55,7 +58,7 @@ function Admin() {
       .from('bookings')
       .update({ status: newStatus })
       .eq('id', id);
-      
+
     if (error) {
       alert('อัปเดตสถานะไม่สำเร็จ: ' + error.message);
     } else {
@@ -71,22 +74,28 @@ function Admin() {
       const { error: deleteError } = await supabase.from('bookings').delete().eq('id', id);
       if (deleteError) throw deleteError;
 
-      const { data: eventData, error: eventError } = await supabase.from('events').select('tickets_sold').eq('id', eventId).single();
+      const { data: eventData, error: eventError } = await supabase
+        .from('events')
+        .select('tickets_sold')
+        .eq('id', eventId)
+        .single();
       if (eventError) throw eventError;
 
-      const { error: updateError } = await supabase.from('events').update({ tickets_sold: eventData.tickets_sold - quantity }).eq('id', eventId);
+      const { error: updateError } = await supabase
+        .from('events')
+        .update({ tickets_sold: Math.max(0, eventData.tickets_sold - quantity) })
+        .eq('id', eventId);
       if (updateError) throw updateError;
 
       alert('ลบข้อมูลและคืนโควต้าสำเร็จ!');
-      fetchBookings(); 
-      fetchEventData(); 
+      fetchBookings();
+      fetchEventData();
     } catch (err) {
       alert('เกิดข้อผิดพลาดในการลบ: ' + err.message);
     }
   };
 
-  // 🔍 กรองข้อมูลตามเบอร์โทร (ถ้ายอดพิมพ์ตรงกับบางส่วนของเบอร์ก็จะแสดงผลทันที)
-  const filteredBookings = bookings.filter((booking) => 
+  const filteredBookings = bookings.filter((booking) =>
     booking.phone.includes(searchTerm)
   );
 
@@ -95,9 +104,9 @@ function Admin() {
       <div className={styles.loginContainer}>
         <form className={styles.loginBox} onSubmit={handleLogin}>
           <h2>Admin Login</h2>
-          <input 
-            type="password" 
-            placeholder="ใส่รหัสผ่าน..." 
+          <input
+            type="password"
+            placeholder="ใส่รหัสผ่าน..."
             className={styles.loginInput}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -112,32 +121,46 @@ function Admin() {
     <div className={styles.adminPage}>
       <div className={styles.container}>
         <h2 className={styles.pageTitle}>ระบบจัดการหลังบ้าน</h2>
-        
+
+        {/* สรุปยอดบัตรคงเหลือแยกตามงาน */}
         <div className={styles.summaryBox}>
-          <h3>ยอดบัตรคงเหลือ: <span className={styles.stockHighlight}>{ticketsLeft} / 50 ใบ</span></h3>
+          {eventsList.length === 0 ? (
+            <h3>กำลังโหลดยอดบัตร...</h3>
+          ) : (
+            eventsList.map((ev) => (
+              <h3 key={ev.id} style={{ margin: '6px 0', fontSize: '1.05rem' }}>
+                {EVENT_NAMES[ev.id] || ev.title}:{' '}
+                <span className={styles.stockHighlight}>
+                  {ev.total_tickets - ev.tickets_sold} / {ev.total_tickets} ใบ
+                </span>
+              </h3>
+            ))
+          )}
         </div>
 
-        {/* 🔍 กล่องค้นหาเบอร์โทร */}
         <div className={styles.searchBox}>
-          <input 
-            type="tel" 
-            placeholder="🔍 ค้นหาด้วยเบอร์โทรศัพท์..." 
+          <input
+            type="tel"
+            placeholder="🔍 ค้นหาด้วยเบอร์โทรศัพท์..."
             className={styles.searchInput}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
+
         {loading ? (
           <p className={styles.loadingText}>กำลังโหลดข้อมูล...</p>
         ) : (
           <div className={styles.cardContainer}>
-            {/* เปลี่ยนจากการ map bookings มาเป็น filteredBookings */}
             {filteredBookings.map((booking) => (
               <div key={booking.id} className={styles.card}>
-                
                 <div className={styles.cardHeader}>
-                  <h3>{booking.customer_name}</h3>
+                  <div>
+                    <small style={{ color: '#e50914', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
+                      {EVENT_NAMES[booking.event_id] || 'ไม่ระบุงาน'}
+                    </small>
+                    <h3>{booking.customer_name}</h3>
+                  </div>
                   <span className={booking.status === 'confirmed' ? styles.badgeConfirmed : styles.badgePending}>
                     {booking.status === 'confirmed' ? 'ยืนยันแล้ว' : 'รอตรวจสอบ'}
                   </span>
@@ -153,24 +176,22 @@ function Admin() {
                   <a href={booking.slip_url} target="_blank" rel="noreferrer" className={styles.btnSlip}>
                     ดูสลิป
                   </a>
-                  <button 
+                  <button
                     className={booking.status === 'pending' ? styles.btnApprove : styles.btnRevoke}
                     onClick={() => toggleStatus(booking.id, booking.status)}
                   >
                     {booking.status === 'pending' ? '✅ อนุมัติ' : '❌ ยกเลิก'}
                   </button>
-                  <button 
+                  <button
                     className={styles.btnDelete}
                     onClick={() => deleteBooking(booking.id, booking.quantity, booking.event_id)}
                   >
                     🗑️ ลบ
                   </button>
                 </div>
-
               </div>
             ))}
-            
-            {/* กรณีพิมพ์หาแล้วไม่เจอข้อมูลเลย */}
+
             {filteredBookings.length === 0 && (
               <p className={styles.emptyText}>
                 {searchTerm ? 'ไม่พบข้อมูลการจองสำหรับเบอร์นี้' : 'ยังไม่มีรายการจอง'}

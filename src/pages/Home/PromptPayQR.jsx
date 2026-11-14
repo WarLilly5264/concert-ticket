@@ -4,7 +4,6 @@ import styles from './PromptPayQR.module.css';
 
 const FONT = "'Noto Sans Thai', 'Sarabun', system-ui, sans-serif";
 
-// โลโก้กลาง QR: วงกลมแดงมีสัญลักษณ์ ฿ (ฝังเป็น data URI ไม่ต้องมีไฟล์รูป)
 const LOGO =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
@@ -15,8 +14,6 @@ const LOGO =
      </svg>`
   );
 
-// ตั้งค่าหน้าตา QR ที่เดียว ใช้ทั้งบนจอและตอนสร้างรูปไว้บันทึก
-// เก็บโมดูลเป็นสีเข้มบนพื้นขาว + error correction ระดับ Q เพื่อให้แอปธนาคารสแกนติดง่าย
 const makeOptions = (data, size) => ({
   width: size,
   height: size,
@@ -46,8 +43,7 @@ function roundRect(g, x, y, w, h, r) {
   g.closePath();
 }
 
-// ประกอบ "การ์ดชำระเงิน" เป็นรูป PNG ผ่าน canvas
-async function buildCardBlob({ payload, amount, accountName, displayId }) {
+async function buildCardBlob({ payload, amount, accountName, displayId, eventTitle }) {
   const W = 900;
   const H = 1220;
 
@@ -63,7 +59,6 @@ async function buildCardBlob({ payload, amount, accountName, displayId }) {
   g.fillStyle = '#111';
   g.fillRect(0, 0, W, H);
 
-  // ตัวการ์ด + หัวสีแดง
   g.save();
   roundRect(g, 50, 50, 800, 1120, 36);
   g.clip();
@@ -76,7 +71,6 @@ async function buildCardBlob({ payload, amount, accountName, displayId }) {
   g.fillRect(50, 50, 800, 200);
   g.restore();
 
-  // รอยบากสองข้างแบบตั๋ว
   g.fillStyle = '#111';
   [50, 850].forEach((x) => {
     g.beginPath();
@@ -86,13 +80,12 @@ async function buildCardBlob({ payload, amount, accountName, displayId }) {
 
   g.textAlign = 'center';
   g.fillStyle = '#fff';
-  g.font = `800 50px ${FONT}`;
-  g.fillText('INDIE KIDS X BAANNAA', W / 2, 140);
+  g.font = `800 46px ${FONT}`;
+  g.fillText(eventTitle || 'CONCERT TICKET', W / 2, 140);
   g.fillStyle = '#ffd6d6';
   g.font = `600 30px ${FONT}`;
   g.fillText('ชำระค่าบัตรผ่านพร้อมเพย์', W / 2, 192);
 
-  // QR อยู่บนพื้นขาวล้วน เว้นขอบรอบตัวกว้างพอสำหรับ quiet zone
   g.drawImage(qrImg, 130, 300, 640, 640);
 
   g.fillStyle = '#111';
@@ -109,14 +102,13 @@ async function buildCardBlob({ payload, amount, accountName, displayId }) {
   );
 }
 
-export default function PromptPayQR({ payload, amount, accountName, displayId }) {
+export default function PromptPayQR({ payload, amount, accountName, displayId, eventTitle }) {
   const boxRef = useRef(null);
   const qrRef = useRef(null);
-  const blobRef = useRef(null); // รูปที่สร้างรอไว้ล่วงหน้า กดปุ่มแล้วแชร์ได้ทันที
+  const blobRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
-  // วาด QR บนจอครั้งแรก (สร้างที่ 2 เท่าแล้วย่อด้วย CSS ให้คมบนจอ retina)
   useEffect(() => {
     const qr = new QRCodeStyling(makeOptions(payload, 440));
     qrRef.current = qr;
@@ -125,18 +117,16 @@ export default function PromptPayQR({ payload, amount, accountName, displayId })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ยอดเปลี่ยน -> อัปเดต QR
   useEffect(() => {
     qrRef.current?.update({ data: payload });
   }, [payload]);
 
-  // เตรียมรูปไว้ล่วงหน้า (หน่วงนิดหน่อยตอนผู้ใช้กดเปลี่ยนจำนวนบัตรรัว ๆ)
   useEffect(() => {
     let cancelled = false;
     blobRef.current = null;
     const t = setTimeout(async () => {
       try {
-        const blob = await buildCardBlob({ payload, amount, accountName, displayId });
+        const blob = await buildCardBlob({ payload, amount, accountName, displayId, eventTitle });
         if (!cancelled) blobRef.current = blob;
       } catch (e) {
         console.error(e);
@@ -146,27 +136,25 @@ export default function PromptPayQR({ payload, amount, accountName, displayId })
       cancelled = true;
       clearTimeout(t);
     };
-  }, [payload, amount, accountName, displayId]);
+  }, [payload, amount, accountName, displayId, eventTitle]);
 
   const handleSave = async () => {
     setSaving(true);
     setMsg('');
     try {
       const blob =
-        blobRef.current ?? (await buildCardBlob({ payload, amount, accountName, displayId }));
+        blobRef.current ?? (await buildCardBlob({ payload, amount, accountName, displayId, eventTitle }));
       const file = new File([blob], `promptpay-${amount}baht.png`, { type: 'image/png' });
 
-      // มือถือ: เปิดหน้าต่างแชร์ของระบบ เลือก "บันทึกรูปภาพ" ลงอัลบั้มได้เลย
       if (navigator.canShare?.({ files: [file] })) {
         try {
           await navigator.share({ files: [file], title: 'QR พร้อมเพย์' });
           return;
         } catch (err) {
-          if (err.name === 'AbortError') return; // ผู้ใช้กดปิดเอง
+          if (err.name === 'AbortError') return;
         }
       }
 
-      // เบราว์เซอร์ที่ไม่รองรับ: ดาวน์โหลดไฟล์ตรง ๆ
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
