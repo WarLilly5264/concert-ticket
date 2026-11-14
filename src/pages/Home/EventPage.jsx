@@ -3,9 +3,18 @@ import styles from './Home.module.css';
 import { supabase } from '../../lib/supabase';
 import { promptPayPayload } from '../../lib/promptpay';
 import PromptPayQR from './PromptPayQR';
+import IndieKids3Ticket from './IndieKids3Ticket';
 
 const PROMPTPAY_ID = '0801650551';
 const ACCOUNT_NAME = 'ภูมินทร์ สุรินโยธา';
+
+// 🧮 คำนวณราคา: โปร 250฿ เฉพาะตอนเลือก 2 ใบเท่านั้น ที่เหลือใบละ 150฿
+function calculateTotal(qty, event) {
+  if (event.promoPairPrice && qty === 2) {
+    return event.promoPairPrice;
+  }
+  return qty * event.onlinePrice;
+}
 
 function EventPage({ event }) {
   const [ticketsLeft, setTicketsLeft] = useState('กำลังโหลด...');
@@ -24,6 +33,9 @@ function EventPage({ event }) {
   const [bookingSuccess, setBookingSuccess] = useState(null);
   const [slipPreview, setSlipPreview] = useState(null);
 
+  // ยอดรวมสุทธิของจำนวนบัตรที่กำลังเลือก
+  const totalAmount = calculateTotal(quantity, event);
+
   useEffect(() => {
     if (!slipFile) {
       setSlipPreview(null);
@@ -34,7 +46,6 @@ function EventPage({ event }) {
     return () => URL.revokeObjectURL(url);
   }, [slipFile]);
 
-  // ดึงยอดบัตรคงเหลือเฉพาะของงานนี้
   useEffect(() => {
     setTicketsLeft('กำลังโหลด...');
     setBookingSuccess(null);
@@ -90,7 +101,7 @@ function EventPage({ event }) {
           name,
           phone,
           quantity,
-          total: quantity * event.onlinePrice,
+          total: totalAmount,
           timestamp: new Date().toLocaleString('th-TH'),
           status: 'pending'
         });
@@ -111,7 +122,6 @@ function EventPage({ event }) {
     }
   };
 
-  // เช็คตั๋วเฉพาะของงานนี้
   const handleCheckTicket = async () => {
     if (!checkPhone) return;
     setIsChecking(true);
@@ -134,7 +144,7 @@ function EventPage({ event }) {
           name: b.customer_name,
           phone: b.phone,
           quantity: b.quantity,
-          total: b.quantity * event.onlinePrice,
+          total: calculateTotal(b.quantity, event),
           timestamp: new Date(b.created_at).toLocaleString('th-TH'),
           status: b.status
         });
@@ -154,32 +164,40 @@ function EventPage({ event }) {
     <div className={styles.container}>
       {bookingSuccess ? (
         <>
-          <div className={styles.eTicketWrapper}>
-            <div className={styles.eTicketTop}>
-              <h2 className={styles.eTicketHeader}>E-TICKET</h2>
-              <h3 className={styles.eTicketEvent}>{bookingSuccess.eventName}</h3>
-            </div>
-
-            <div className={styles.ticketDivider}></div>
-
-            <div className={styles.eTicketBottom}>
-              <div className={styles.eTicketDetails}>
-                <div className={styles.detailRow}><span>ชื่อ:</span> <strong>{bookingSuccess.name}</strong></div>
-                <div className={styles.detailRow}><span>เบอร์โทร:</span> <strong>{bookingSuccess.phone}</strong></div>
-                <div className={styles.detailRow}><span>จำนวนบัตร:</span> <strong>{bookingSuccess.quantity} ใบ</strong></div>
-                <div className={styles.detailRow}><span>ยอดชำระ:</span> <strong>{bookingSuccess.total} บาท</strong></div>
-                <div className={styles.detailRow}><span>เวลา:</span> <strong>{bookingSuccess.timestamp}</strong></div>
+          {event.dbId === 'cbea4e42-b6a6-41df-852a-377137ce9fa3' ? (
+            <IndieKids3Ticket booking={bookingSuccess} poster={event.poster} />
+          ) : (
+            <div className={styles.eTicketWrapper}>
+              <div className={styles.eTicketTop}>
+                <h2 className={styles.eTicketHeader}>E-TICKET</h2>
+                <h3 className={styles.eTicketEvent}>{bookingSuccess.eventName}</h3>
               </div>
 
-              <div className={bookingSuccess.status === 'confirmed' ? styles.eTicketStatusConfirmed : styles.eTicketStatus}>
-                {bookingSuccess.status === 'confirmed' ? '✅ ยืนยันการชำระเงินแล้ว' : '⏳ รอตรวจสอบการชำระเงิน'}
+              <div className={styles.ticketDivider}></div>
+
+              <div className={styles.eTicketBottom}>
+                <div className={styles.eTicketDetails}>
+                  <div className={styles.detailRow}><span>ชื่อ:</span> <strong>{bookingSuccess.name}</strong></div>
+                  <div className={styles.detailRow}><span>เบอร์โทร:</span> <strong>{bookingSuccess.phone}</strong></div>
+                  <div className={styles.detailRow}><span>จำนวนบัตร:</span> <strong>{bookingSuccess.quantity} ใบ</strong></div>
+                  <div className={styles.detailRow}><span>ยอดชำระ:</span> <strong>{bookingSuccess.total} บาท</strong></div>
+                  <div className={styles.detailRow}><span>เวลา:</span> <strong>{bookingSuccess.timestamp}</strong></div>
+                </div>
+
+                <div className={bookingSuccess.status === 'confirmed' ? styles.eTicketStatusConfirmed : styles.eTicketStatus}>
+                  {bookingSuccess.status === 'confirmed' ? '✅ ยืนยันการชำระเงินแล้ว' : '⏳ รอตรวจสอบการชำระเงิน'}
+                </div>
+
+                <p className={styles.eTicketNote}>โปรดแคปหน้าจอนี้เก็บไว้เป็นหลักฐานเพื่อแสดงหน้างาน</p>
               </div>
-
-              <p className={styles.eTicketNote}>โปรดแคปหน้าจอนี้เก็บไว้เป็นหลักฐานเพื่อแสดงหน้างาน</p>
             </div>
-          </div>
+          )}
 
-          <button className={styles.backButton} onClick={() => setBookingSuccess(null)}>
+          <button
+            className={styles.backButton}
+            style={{ maxWidth: '380px' }}
+            onClick={() => setBookingSuccess(null)}
+          >
             กลับสู่หน้างาน
           </button>
         </>
@@ -208,6 +226,11 @@ function EventPage({ event }) {
 
             <div className={styles.ticketInfo}>
               <p>ONLINE TICKET: <strong>{event.onlinePrice}฿</strong></p>
+              {event.promoPairPrice && (
+                <p style={{ color: '#fcd34d', fontWeight: 'bold' }}>
+                  🔥 PROMO มา 2 คน: {event.promoPairPrice}฿ (เฉลี่ยคนละ {event.promoPairPrice / 2}฿)
+                </p>
+              )}
               <p>AT DOOR: {event.doorPrice}฿</p>
             </div>
 
@@ -259,22 +282,27 @@ function EventPage({ event }) {
                 <label>จำนวนบัตร:</label>
                 <select
                   className={styles.selectField}
+                  style={{ width: 'auto', minWidth: '150px' }}
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
                   disabled={isSubmitting}
                 >
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <option key={num} value={num} disabled={num > ticketsLeft}>
-                      {num} ใบ
-                    </option>
-                  ))}
+                  {[1, 2, 3, 4, 5].map((num) => {
+                    const price = calculateTotal(num, event);
+                    const isPromo = event.promoPairPrice && num === 2;
+                    return (
+                      <option key={num} value={num} disabled={num > ticketsLeft}>
+                        {num} ใบ ({price}฿{isPromo ? ' โปรคู่' : ''})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>
 
             <PromptPayQR
-              payload={promptPayPayload(PROMPTPAY_ID, quantity * event.onlinePrice)}
-              amount={quantity * event.onlinePrice}
+              payload={promptPayPayload(PROMPTPAY_ID, totalAmount)}
+              amount={totalAmount}
               accountName={ACCOUNT_NAME}
               displayId={PROMPTPAY_ID.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')}
               eventTitle={event.title}

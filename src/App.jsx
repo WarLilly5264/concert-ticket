@@ -19,7 +19,7 @@ const EVENT_1 = {
     '21:30 IDIN'
   ],
   onlinePrice: 150,
-  doorPrice: 250
+  doorPrice: 250,
 };
 
 const EVENT_2 = {
@@ -40,7 +40,8 @@ const EVENT_2 = {
     'Secret Door'
   ],
   onlinePrice: 150,
-  doorPrice: 250
+  doorPrice: 250,
+  promoPairPrice: 250 // 🔥 โปรมา 2 คน 250 บาท
 };
 
 // หน้าเลือกงาน (กรณีคนเข้าลิงก์หลัก /)

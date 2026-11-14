@@ -1,0 +1,371 @@
+.ticketCard {
+  width: 100%;
+  max-width: 720px;
+  margin: 16px auto;
+  background-color: #ffffff;
+  color: #1f2937;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  text-align: left;
+  transition: transform 0.3s ease;
+}
+
+.ticketCard:hover {
+  transform: scale(1.01);
+}
+
+/* --- ส่วนรูปโปสเตอร์ (ด้านบนในมือถือ / ด้านซ้ายในจอคอม) --- */
+.posterCol {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  background-color: #0f4c81;
+  flex-shrink: 0;
+}
+
+.posterImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
+
+.admitBadge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background-color: #facc15;
+  color: #000000;
+  font-weight: 900;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  transform: rotate(-2deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* --- ส่วนรายละเอียดตั๋ว --- */
+.detailsCol {
+  position: relative;
+  flex: 1;
+  padding: 24px 20px;
+  background-color: #fdfdfd;
+  border-top: 2px dashed #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* รอยบากวงกลมกลืนกับพื้นหลังสีเข้ม (#111) */
+.cutoutA,
+.cutoutB {
+  position: absolute;
+  top: -14px;
+  width: 28px;
+  height: 28px;
+  background-color: #111111;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.cutoutA {
+  left: -14px;
+}
+
+.cutoutB {
+  right: -14px;
+}
+
+/* --- ส่วนหัวตั๋ว --- */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.eventTitle {
+  margin: 0 0 6px 0;
+  font-size: 1.75rem;
+  font-weight: 900;
+  line-height: 1.05;
+  color: #0f4c81;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+  text-shadow: 1px 2px 0px rgba(15, 76, 129, 0.12);
+}
+
+.subLineup {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.priceCircle {
+  flex-shrink: 0;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background-color: #f5c518;
+  color: #111111;
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(6deg);
+}
+
+.priceNum {
+  font-size: 1.25rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.priceUnit {
+  font-size: 0.7rem;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+/* --- ตารางข้อมูลผู้จอง & งาน --- */
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 12px;
+  margin-bottom: 18px;
+}
+
+.fullSpan {
+  grid-column: span 2;
+}
+
+.label {
+  margin: 0 0 2px 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.value {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.valueHighlight {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f4c81;
+}
+
+/* --- แถบสถานะการชำระเงิน --- */
+.statusRow {
+  margin-bottom: 18px;
+}
+
+.statusConfirmed {
+  display: inline-block;
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.statusPending {
+  display: inline-block;
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* --- ส่วนท้าย บาร์โค้ด & เลขซีเรียล --- */
+.footerSection {
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.barcodeWrap {
+  flex: 1;
+}
+
+.barcode {
+  height: 40px;
+  width: 100%;
+  border-radius: 3px;
+  opacity: 0.85;
+  background-image: repeating-linear-gradient(
+    to right,
+    #111 0, #111 2px,
+    transparent 2px, transparent 5px,
+    #111 5px, #111 8px,
+    transparent 8px, transparent 10px,
+    #111 10px, #111 11px,
+    transparent 11px, transparent 14px,
+    #111 14px, #111 18px,
+    transparent 18px, transparent 20px,
+    #111 20px, #111 21px,
+    transparent 21px, transparent 24px,
+    #111 24px, #111 28px,
+    transparent 28px, transparent 30px
+  );
+}
+
+.serialText {
+  margin: 6px 0 0 0;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #64748b;
+}
+
+.miniQr {
+  width: 56px;
+  height: 56px;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  padding: 6px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.noteText {
+  margin: 12px 0 0 0;
+  text-align: center;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* --- จอแท็บเล็ต / คอมพิวเตอร์ (วางแนวนอนซ้าย-ขวาเหมือนบัตรจริง) --- */
+@media (min-width: 768px) {
+  .ticketCard {
+    flex-direction: row;
+  }
+
+  .posterCol {
+    width: 38%;
+    height: auto;
+  }
+
+  .detailsCol {
+    width: 62%;
+    padding: 32px;
+    border-top: none;
+    border-left: 2px dashed #cbd5e1;
+  }
+
+  .cutoutA {
+    top: -14px;
+    left: -14px;
+  }
+
+  .cutoutB {
+    top: auto;
+    bottom: -14px;
+    left: -14px;
+    right: auto;
+  }
+
+  .eventTitle {
+    font-size: 2.2rem;
+  }
+}
+/* --- ปุ่มบันทึกรูปบัตร E-Ticket (เลือกได้ทั้งแนวตั้ง / แนวนอน) --- */
+.saveBtnGroup {
+  width: 100%;
+  max-width: 720px;
+  margin: 10px auto 0 auto;
+  display: flex;
+  gap: 10px;
+}
+
+.saveTicketBtn {
+  flex: 1;
+  min-height: 52px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.saveTicketBtnAlt {
+  flex: 1;
+  min-height: 52px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 2px solid #facc15;
+  background-color: #1e293b;
+  color: #facc15;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.saveTicketBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
+}
+
+.saveTicketBtnAlt:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background-color: rgba(250, 204, 21, 0.12);
+}
+
+.saveTicketBtn:disabled,
+.saveTicketBtnAlt:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.saveHint {
+  margin: 8px 0 4px 0;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
