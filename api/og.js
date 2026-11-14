@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     '1': {
       title: 'INDIE KIDS X BAANNAA',
       description: '27 NOVEMBER 2026 @ BAANNAA | จองบัตรออนไลน์ 150฿',
-      image: `${baseUrl}/poster-1.jpg`,
+      image: `${baseUrl}/image_899a45.jpg`,
     },
     '2': {
       title: 'อินดี้คิดส์ปาร์ตี้ 3',
